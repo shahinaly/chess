@@ -15,26 +15,9 @@
  *
  * */
 
-void imp_board(void);
-void showbits(long long unsigned );
 
-int main() {
-   imp_board(); 
-}
-
+/* Bitboard Structure */
 struct board {
-    
-    /* Board will consist of the following bitboards:
-     * 1. Pawns
-     * 2. Knights
-     * 3. Bishops
-     * 4. Rooks
-     * 5. Queens
-     * 6. Kings
-     * 7. White Pieces
-     * 8. Black Pieces
-     * */
-    
     unsigned long long pawns; 
     unsigned long long knights;
     unsigned long long bishops;
@@ -45,31 +28,26 @@ struct board {
     
     unsigned long long white;
     unsigned long long black;
-
 };
 
-void imp_board() {
-    
-    struct board b;
-   
-    b.pawns = 0x00FF00000000FF00;
-    b.knights = (0b01000010ULL << 56) + 0b01000010;
-    b.bishops = (0b00100100ULL << 56) + 0b00100100;
-    
-    b.rooks =  (0b10000001ULL << 56) + 0b10000001;
-    b.queens =  (0b00010000ULL << 56) + 0b00010000;
-    b.kings =  (0b00001000ULL << 56) + 0b00001000;
-    
-    b.white = 0x000000000000FFFFULL;
-    b.black = 0xFFFF000000000000ULL;
-   
-    showbits(b.white | b.black);
+/* Declaring all module functions */
+void showbits(struct board);
+void impboard(struct board *);
+void move(struct board);
 
+/* Board Declaration */
+int main() {
+    struct board b;
+    impboard(&b);
+    
+    showbits(b);
 }
 
 // Edited from Wikipedia: Bitwise Operators in C
-void showbits( long long unsigned x) { 
+void showbits(struct board b) { 
     
+    long long unsigned x = (b.white | b.black);
+
     for (int i = 8; i > 0; i--) {
         for (int j = 8; j > 0; j--) {
             
@@ -78,5 +56,19 @@ void showbits( long long unsigned x) {
         }
     }
     printf("\n");
+}
+
+void impboard(struct board *pb) {
+
+    (*pb).pawns = 0x00FF00000000FF00;
+    (*pb).knights = (0b01000010ULL << 56) + 0b01000010;
+    (*pb).bishops = (0b00100100ULL << 56) + 0b00100100;
+   
+    (*pb).rooks =  (0b10000001ULL << 56) + 0b10000001;
+    (*pb).queens =  (0b00010000ULL << 56) + 0b00010000;
+    (*pb).kings =  (0b00001000ULL << 56) + 0b00001000;
+    
+    (*pb).white = 0x000000000000FFFFULL;
+    (*pb).black = 0xFFFF000000000000ULL;
 }
 
