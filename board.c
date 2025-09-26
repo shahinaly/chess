@@ -33,20 +33,20 @@ struct board {
 /* Declaring all module functions */
 void showbits(struct board);
 void impboard(struct board *);
-void move(struct board);
+int move(struct board *, long long unsigned *, int from, int to);
+void parse_move(char []);
 
 /* Board Declaration */
 int main() {
     struct board b;
     impboard(&b);
-    
+    move(&b, &(b.white), 12, 20); 
     showbits(b);
 }
 
 // Edited from Wikipedia: Bitwise Operators in C
 void showbits(struct board b) { 
-    
-    long long unsigned x = (b.white | b.black);
+    long long unsigned x = (b.white);
 
     for (int i = 8; i > 0; i--) {
         for (int j = 8; j > 0; j--) {
@@ -59,7 +59,6 @@ void showbits(struct board b) {
 }
 
 void impboard(struct board *pb) {
-
     (*pb).pawns = 0x00FF00000000FF00;
     (*pb).knights = (0b01000010ULL << 56) + 0b01000010;
     (*pb).bishops = (0b00100100ULL << 56) + 0b00100100;
@@ -72,3 +71,40 @@ void impboard(struct board *pb) {
     (*pb).black = 0xFFFF000000000000ULL;
 }
 
+int move(struct board *pb, unsigned long long *mvrpieces, int from, int to) {
+   
+    /* move() must check:
+     *  - in check?
+     *  - legal?
+     *      - can it be reached by piece?
+     *      - square occupied by same colour?
+     *      - does it put king in check?
+     **/
+    
+    long long unsigned pick = 1ULL << from;
+    long long unsigned put = 1ULL << to;   
+    
+    // in check?
+    //if incheck() return 1;
+        
+    
+    // legality: Can it be reach by piece?
+    // TODO
+    
+    // legality: Is there a piece there to be moved?
+    //if((*mvrpieces & pick) != 0ULL) return 1; 
+    
+    // legality: Square occupied by same colour?
+    //if((*mvrpieces & put) != 0ULL) return 1; 
+    
+    (*pb).white = ((*pb).white ^ pick ^ put);
+    
+}
+
+// Accepts String in algebraic notation and returns [int from, int to] 
+void parse_move(char move[]) {
+    // move[] can look like: e4, Na5, Rdf8, Qh4e1, 0-0, 0-0-0, e8=Q
+    
+    return ;
+
+}
