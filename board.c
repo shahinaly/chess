@@ -34,15 +34,7 @@ struct board {
 void showbits(struct board);
 void impboard(struct board *);
 int move(struct board *, long long unsigned *, int from, int to);
-void parse_move(char []);
-
-/* Board Declaration */
-int main() {
-    struct board b;
-    impboard(&b);
-    move(&b, &(b.white), 12, 20); 
-    showbits(b);
-}
+int parse_move(char []);
 
 // Edited from Wikipedia: Bitwise Operators in C
 void showbits(struct board b) { 
@@ -88,7 +80,7 @@ int move(struct board *pb, unsigned long long *mvrpieces, int from, int to) {
     //if incheck() return 1;
         
     
-    // legality: Can it be reach by piece?
+    // legality: Can it be reached by piece?
     // TODO
     
     // legality: Is there a piece there to be moved?
@@ -102,9 +94,32 @@ int move(struct board *pb, unsigned long long *mvrpieces, int from, int to) {
 }
 
 // Accepts String in algebraic notation and returns [int from, int to] 
-void parse_move(char move[]) {
-    // move[] can look like: e4, Na5, Rdf8, Qh4e1, 0-0, 0-0-0, e8=Q
+int parse_move(char move[]) {
     
-    return ;
+    // move[] can look like: e4, Na5, Rdf8, Qh4e1, 0-0, 0-0-0, e8=Q
+    char ranks[] = "12345678";
+    char files[] = "abcdefgh";
+    
+    int file = *strchr(files, move[0]) - 'a';
+    int rank = *strchr(ranks, move[1]) - '1';
+
+    printf("%d\n", rank * 8 + file );
 
 }
+
+/* Board Declaration */
+int main() {
+    struct board b;
+    impboard(&b);
+    move(&b, &(b.white), 12, 20); 
+    showbits(b);
+    
+    parse_move("h8");
+}
+
+
+
+
+
+
+
