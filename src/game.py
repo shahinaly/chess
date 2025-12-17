@@ -16,14 +16,16 @@ class Game:
       self.full_move = int(self.full_move)
 
    def __str__(self):
-      print(self.board)
+      print("—"*64)
+      print(self.board, end = '')
+      print("—"*64)
       print(
          "Active color:    " + self.active_color,
          "Move number:     " + str(self.full_move),
          "Castling:        " + self.castling,
          "En passant:      " + self.en_passant,
          "FEN:             " + self.board.fen,
-         sep="\n",
+         sep="\n"
       )
+      print("—"*64, end = '')
       return ""
-
