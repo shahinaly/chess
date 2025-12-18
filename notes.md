@@ -25,3 +25,14 @@ Perhaps it would be worth thinking ahead instead and trying to predict what func
     - input: some object representing the game state - either game object or a fen string
     - output: a list of moves in the form of array indices.
 Essentially, there should be a board.moves(square) function that generates the legal moves for a particular square.
+
+# 2025-12-16
+
+Worth thinking about smart ways to actually implement a move as it can start to get unruly. Perhaps a good way to start thinking about it that all moves can be
+broadly classified as follows:
+  - Positioning Move (i.e no capture)
+  - Capture
+  - Castling
+  - Special Pawn Moves
+# 2025-12-17
+The goal for today is to implement legal moves and have a function for making and unmaking moves.

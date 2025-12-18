@@ -2,18 +2,17 @@ def convert_loc(loc):
    """
    Converts between 1D array board representation index and algebraic notation
    """
-   files = 'zabcdefghi'
+   files = 'yzabcdefghij'
 
    if type(loc) is int :
-      rank = loc // 10                          # e.g loc 53 => rank 5 on a 10x10 board
-      file = files[(loc - 10 * rank)]             # e.g loc 53 => file = 53 - 5*10
+      rank = (loc // 12) - 1                           # e.g loc 53 => rank 5 on a 10x10 board
+      file = files[(loc - 12 * (rank + 1))]              # e.g loc 53 => file = 53 - 5*10
       return file + str(rank)
 
    elif type(loc) is str :
-      rank = int(loc[1])
+      rank = int(loc[1:]) + 1
       file = files.index(loc[0])
-      loc = str(rank) + str(file)   # 'a5' equivalent to 51 
-      return int(loc)
+      return rank*12 + file
 
 def sgn(piece : int):
    """
@@ -23,14 +22,7 @@ def sgn(piece : int):
    # Current implementation of pieces is 1..6 for P...K with black pieces being negative
    if piece < 0: return -1
    elif piece > 0: return  1
+   elif piece == 0: return 0
+   else: return None
 
-def valid_target_square(piece : int, target_square : int):
-   """
-      Returns a boolean depending on whether a given target square is valid for a piece 
-      to move to or to capture.
-   """
-   if (target_square is None) or sgn(piece) == sgn(target_square):
-      return False
-   else:
-      return True
 
