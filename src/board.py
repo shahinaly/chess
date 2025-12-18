@@ -9,13 +9,12 @@ class Board:
       for rank in reversed(range(12)):
          for file in range(12):
             square = rank*12 + file # for when I mess up coorddinates, inevitably
-
             # print empty squares as '_'
             if self.array[square] == 0:
-               print("_", end ='')
+               print(" . ", end ='')
             # else, print non-None values
             elif self.array[square] is not None: 
-               print(piece_rep(self.array[square]), end = '')
+               print(f" {piece_rep(self.array[square])} ", end = '')
             # Newline after 8 files, exlcuding boundary squares
             if file == 11 and (not (rank in [0,1,10,11])):
                print("\n", end = '')
