@@ -21,8 +21,8 @@ def get_moves(loc : int, board : array) -> array:
    # - 50 move rule
    if (type(loc) == str) :
       loc = convert_loc(loc)
-   piece = board[loc]
-   if piece == None : return []
+   piece = board.array[loc]
+   if piece == None or piece == 0 : return []
 
    if abs(piece) == 1: return pawn_moves(loc, board)
    if abs(piece) == 2: return knight_moves(loc, board)
@@ -31,7 +31,7 @@ def get_moves(loc : int, board : array) -> array:
    if abs(piece) == 5: return queen_moves(loc, board)
    if abs(piece) == 6: return king_moves(loc, board)
 
-def pawn_moves(start_idx : int, board : list) -> list:
+def pawn_moves(start_idx : int, board : Board) -> list:
    #TODO: Add en passant
 
    # just to allow testing using alegbraic notation
@@ -39,7 +39,7 @@ def pawn_moves(start_idx : int, board : list) -> list:
       start_idx = convert_loc(start_idx)
 
    result = []
-   piece = board[start_idx]
+   piece = board.array[start_idx]
    # FLAGS:
 
    # White/black pieces move in positve/negative direction up the board
@@ -50,7 +50,7 @@ def pawn_moves(start_idx : int, board : list) -> list:
    for step in [north_west, north, north_east, north*2]:
 
       target_idx = start_idx + direction*step
-      end_value = board[target_idx]
+      end_value = board.array[target_idx]
    
       if (end_value is None):                      # Do not move off the board
          continue
@@ -63,25 +63,25 @@ def pawn_moves(start_idx : int, board : list) -> list:
       elif end_value == 0 and step == north:
          result.append(target_idx)
       # Allow two step if on starting rank and nothing blocking intermediate square
-      elif on_starting_row and step == north*2 and end_value == 0 and board[target_idx + direction*south] == 0:
+      elif on_starting_row and step == north*2 and end_value == 0 and board.array[target_idx + direction*south] == 0:
          result.append(target_idx)
 
    return result
 
-def knight_moves(start_idx : int, board : list) -> list:
+def knight_moves(start_idx : int, board : Board) -> list:
    # just to allow testing using alegbraic notation
    if (type(start_idx) == str) :
       start_idx = convert_loc(start_idx)
 
    result = []
-   piece = board[start_idx]
+   piece = board.array[start_idx]
    # white/black pieces positive/negative direction to move to tail/head of list
    direction = sgn(piece)
 
    for step in [10,23,25,14,-10,-23,-25,-14]:
       end_idx = start_idx + direction*step
-      start_value = board[start_idx]
-      end_value = board[end_idx]
+      start_value = board.array[start_idx]
+      end_value = board.array[end_idx]
       direction = sgn(start_value)
 
       if (end_value is None):                         # Do not move off the board
@@ -92,27 +92,27 @@ def knight_moves(start_idx : int, board : list) -> list:
          result.append(end_idx)                                  # or jump to empty square
    return result
 
-def bishop_moves(start_idx : int, board : list) -> bool:
+def bishop_moves(start_idx : int, board : Board) -> bool:
    bishop_steps = [north_west, north_east, south_west, south_east]
    return slide_moves(start_idx, board, bishop_steps)
 
-def rook_moves(start_idx : int, board : list) -> bool:
+def rook_moves(start_idx : int, board : Board) -> bool:
    rook_steps = [north, south, east, west]
    return slide_moves(start_idx, board, rook_steps)
 
-def queen_moves(start_idx : int, board : list) -> bool:
+def queen_moves(start_idx : int, board : Board) -> bool:
    rook_steps = [north, south, east, west, north_west, north_east, south_west, south_east]
    return slide_moves(start_idx, board, rook_steps)
 
-def king_moves(start_idx : int, board : list ) -> bool:
+def king_moves(start_idx : int, board : Board ) -> bool:
    result = []
-   piece = board[start_idx]
+   piece = board.array[start_idx]
    # White/black pieces move in positve/negative direction up the board
    direction = sgn(piece)  
 
    for step in [north, south, east, west, north_west, north_east, south_west, south_east]:
       target_idx = start_idx + direction*step
-      end_value = board[target_idx]
+      end_value = board.array[target_idx]
    
       if (end_value is None):                      # Do not move off the board
          continue
@@ -124,9 +124,9 @@ def king_moves(start_idx : int, board : list ) -> bool:
          result.append(target_idx)
    return result
 
-def slide_moves(start_idx : int, board : list, steps : list) -> list:
+def slide_moves(start_idx : int, board : Board, steps : list) -> list:
    result = []
-   piece = board[start_idx]
+   piece = board.array[start_idx]
    direction = sgn(piece)
 
    for step in steps:
@@ -134,7 +134,7 @@ def slide_moves(start_idx : int, board : list, steps : list) -> list:
    
          while True:
             curr_idx = curr_idx + direction*step
-            end_value = board[curr_idx]
+            end_value = board.array[curr_idx]
    
             # Do not move off the board
             if (end_value is None): 

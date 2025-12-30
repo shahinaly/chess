@@ -25,4 +25,13 @@ def sgn(piece : int):
    elif piece == 0: return 0
    else: return None
 
+def convert_lan(lan : str) -> list:
+   start_coor = lan[:2]
+   end_coor = lan[2:]
+   
+   return list(map(convert_loc, [start_coor, end_coor]))
+
+
+
+   
 

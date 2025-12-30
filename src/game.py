@@ -1,4 +1,6 @@
 from board import *
+import helpers as hp
+import moves
 
 class Game:
    """ A game object is a container for game-level information """
@@ -29,3 +31,15 @@ class Game:
       )
       print("—"*64, end = '')
       return ""
+   def push(self, lan : str): #lan here is long algebraic notation
+      start_coor, end_coor = hp.convert_lan(lan)
+      
+      #check legality
+      legal_moves = moves.get_moves(start_coor,self.board)
+      
+      if end_coor in legal_moves:
+         self.board.array[end_coor] = self.board.array[start_coor]
+         self.board.array[start_coor] = 0
+      return self
+
+
