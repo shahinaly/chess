@@ -1,55 +1,54 @@
+import board_helpers
+import helpers
+import moves
+
 class Board:
-   def __init__(self, fen):
-      self.fen = fen
-      self.array = make_board(fen)
-   
+   """
+   Board object is a container game data and methods to manipulate that data.
+   """
+   def __init__( self, fen: str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"):
+      (self.fen,
+       self.active_color,
+       self.castling,
+       self.en_passant,
+       self.half_move,
+       self.full_move) = fen.split()
+      
+      self.array = board_helpers.make_board(self.fen)
+      self.half_move = int(self.half_move)
+      self.full_move = int(self.full_move)
+
    def __str__(self):
-      # To print the board in a standard format, we must go in the following order:
-      # 81...88/.../11...18
-      for rank in reversed(range(12)):
-         for file in range(12):
-            square = rank*12 + file # for when I mess up coorddinates, inevitably
-            # print empty squares as '_'
-            if self.array[square] == 0:
-               print(" . ", end ='')
-            # else, print non-None values
-            elif self.array[square] is not None: 
-               print(f" {piece_rep(self.array[square])} ", end = '')
-            # Newline after 8 files, exlcuding boundary squares
-            if file == 11 and (not (rank in [0,1,10,11])):
-               print("\n", end = '')
+      print("—"*72)
+      board_helpers.print_board_array(self)
+      print("—"*72)
+      print(
+         "Active color:             " + self.active_color,
+         "Current Move number:      " + str(self.full_move),
+         "Castling:                 " + self.castling,
+         "En passant:               " + self.en_passant,
+         "FEN:                      " + self.fen,
+         sep="\n"
+      )
+      print("—"*72, end = '')
       return ""
 
-def make_board(fen : str):
-   """
-   Accepts a FEN string and returns a 10x10 1D array board
-   representation with boreder padding.
-   """
-   result = [None] * 26
-   rows = fen.split('/')
-   rows = reversed(rows)
-   for row in rows:
-      for char in row:
-         if char.isdigit():                           # add empty squares
-            result.extend([0]*int(char))
-         else:                                        # add pieces
-            result.append(piece_rep(char))
-      result.extend([None]*4)
-   result = result + [None] * 22    # add 0 and 9th row padding
-   return result
+   def push(self, lan : str): #lan here is long algebraic notation
+      start_coor, end_coor = helpers.convert_lan(lan)
+      
+      #check legality
+      legal_moves = moves.get_moves(start_coor,self)
+      
+      # If legal, make move and update data
+      if end_coor in legal_moves:
+         self.array[end_coor] = self.array[start_coor]
+         self.array[start_coor] = 0
 
-def piece_rep(piece):
-   """ 
-   converts between character and integer represenation
-   """
-   pieces = ['P','N','B','R','Q','K']
-   if(type(piece) == str):
-      if piece == piece.upper():
-         return ( pieces.index(piece) + 1 )
-      else:
-         return ( -1 ) * ( pieces.index(piece.upper()) + 1 )
-   elif(type(piece) == int):
-      if piece < 0 :
-         return pieces[(-1)*piece - 1].lower()
-      else:
-         return pieces[piece - 1]
+         # Update active_color and move count
+         if self.active_color == 'b': 
+            self.active_color = 'w'
+            self.full_move += 1
+            self.half_move += 1
+         else: self.active_color = 'b'
+
+      return self

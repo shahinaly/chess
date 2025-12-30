@@ -1,6 +1,5 @@
 from helpers import *
-from game import *
-
+import board
 # Not the best, but Black is not affected becuase color determines
 # orientation and therefore sign of the travel step.
 north = 12
@@ -150,3 +149,4 @@ def slide_moves(start_idx : int, board : Board, steps : list) -> list:
             elif (end_value == 0):
                result.append(curr_idx)
    return result
+
