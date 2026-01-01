@@ -11,11 +11,11 @@ Rough Outline of things that need to happen:
     - ~50 move rule flag~
 2. Game Logic (Essential Functions)
     - Find Moves
-      - Legal moves for pieces
-      - ~Regular moves for pawns~
+      - ~Piece movement~
+      - ~Pawn movement~
       - en-passant
       - Castling
-    - Make mov
-    - Unmake move
+    - ~Make move~
+    - ~Unmake move~
     - In check?
     - Promote
