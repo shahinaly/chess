@@ -49,3 +49,16 @@ def piece_rep(piece):
          return pieces[(-1)*piece - 1].lower()
       else:
          return pieces[piece - 1]
+
+def find_kings(board):
+   """
+   Returns list of King locations. Run during board initialisation.
+   """
+   result = [None,None]
+   for square in range(len(board.array)):
+      if board.array[square] == 6:
+         result[0] = square
+      if board.array[square] == -6:
+         result[1] = square
+
+   return result 

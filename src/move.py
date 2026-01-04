@@ -11,6 +11,15 @@ north_west = 11
 south_east = -11
 south_west = -13
 
+piece_steps = {
+   1 : [north, north_west, north_east],
+   2 : [10,23,25,14,-10,-23,-25,-14],
+   3 : [north_west, north_east, south_west, south_east],
+   4 : [north, south, east, west],
+   5 : [north,south, east, west, north_east, north_west, south_east, south_west],
+   6 : [north,south, east, west, north_east, north_west, south_east, south_west]
+}
+
 class Move:
    def __init__(self, from_square : int, to_square : int, from_piece : int, to_piece : int):
       self.from_square = from_square
@@ -18,7 +27,21 @@ class Move:
       self.from_piece = from_piece
       self.to_piece = to_piece
 
-def get_moves(loc : int, board : array) -> array:
+def get_legal_moves(board : Board, start_idx : int, san_flag = False) -> list:
+   all_moves = get_moves(board, start_idx, False)
+   result = []
+   for move in all_moves:
+      board.push_idx(start_idx, move)
+      if not(in_check(board, move)):
+         if san_flag:
+            result.append(pt.convert_loc(move))
+         else:
+            result.append(move)
+      board.pop()
+   print(move)
+   return result
+
+def get_moves(board : Board, loc : int, san_flag = False) -> list:
    # Build sequentially taking into account the following:
    # - Piece Type
    # - Piece Color
@@ -29,23 +52,36 @@ def get_moves(loc : int, board : array) -> array:
    piece = board.array[loc]
    if piece == None or piece == 0 : return []
 
-   if abs(piece) == 1: return pawn_moves(loc, board)
-   if abs(piece) == 2: return knight_moves(loc, board)
-   if abs(piece) == 3: return bishop_moves(loc, board)
-   if abs(piece) == 4: return rook_moves(loc, board)
-   if abs(piece) == 5: return queen_moves(loc, board)
-   if abs(piece) == 6: return king_moves(loc, board)
+   moves_fcts = [pawn_moves, knight_moves, bishop_moves, rook_moves, queen_moves, king_moves]
+   if san_flag:
+      return list(map(pt.convert_loc, moves_fcts[abs(piece) - 1](board, loc)))
+   else:
+      return moves_fcts[abs(piece) - 1](board, loc)
 
-def pawn_moves(start_idx : int, board : Board) -> list:
+# Callers, for lack of a better term
+def pawn_moves(board : Board, start_idx : int) -> list:
    #TODO: Add en passant
 
    # just to allow testing using alegbraic notation
    if (type(start_idx) == str) :
       start_idx = convert_loc(start_idx)
 
-   return pawn_walks(start_idx, board) + pawn_captures(start_idx, board)
+   return pawn_walks(board, start_idx) + pawn_captures(board, start_idx)
 
-def pawn_walks(start_idx : int, board : Board) -> list:
+def bishop_moves(board : Board, start_idx : int) -> bool:
+   bishop_steps = [north_west, north_east, south_west, south_east]
+   return slide_moves(board, start_idx, bishop_steps)
+
+def rook_moves(board : Board, start_idx : int) -> bool:
+   rook_steps = [north, south, east, west]
+   return slide_moves(board, start_idx, rook_steps)
+
+def queen_moves(board : Board, start_idx : int) -> bool:
+   queen_steps = [north, south, east, west, north_west, north_east, south_west, south_east]
+   return slide_moves(board, start_idx, queen_steps)
+
+# Calculators, for lack of a better term
+def pawn_walks(board : Board, start_idx : int) -> list:
    result = []
    piece = board.array[start_idx]
 
@@ -60,7 +96,7 @@ def pawn_walks(start_idx : int, board : Board) -> list:
       end_value = board.array[target_idx]
 
       # Don't march off the board or when blocked by any piece
-      if (end_value is None or end_value is not 0):
+      if (end_value is None or end_value != 0):
          break
       # Move forward an empty square
       elif step == north:
@@ -72,7 +108,7 @@ def pawn_walks(start_idx : int, board : Board) -> list:
 
    return result
 
-def pawn_captures(start_idx : int, board : Board) -> list:
+def pawn_captures(board : Board, start_idx : int) -> list:
    
    result = []
    piece = board.array[start_idx]
@@ -89,7 +125,7 @@ def pawn_captures(start_idx : int, board : Board) -> list:
 
    return result
 
-def knight_moves(start_idx : int, board : Board) -> list:
+def knight_moves(board : Board, start_idx : int) -> list:
    # just to allow testing using alegbraic notation
    if (type(start_idx) == str) :
       start_idx = convert_loc(start_idx)
@@ -113,19 +149,7 @@ def knight_moves(start_idx : int, board : Board) -> list:
          result.append(end_idx)                                  # or jump to empty square
    return result
 
-def bishop_moves(start_idx : int, board : Board) -> bool:
-   bishop_steps = [north_west, north_east, south_west, south_east]
-   return slide_moves(start_idx, board, bishop_steps)
-
-def rook_moves(start_idx : int, board : Board) -> bool:
-   rook_steps = [north, south, east, west]
-   return slide_moves(start_idx, board, rook_steps)
-
-def queen_moves(start_idx : int, board : Board) -> bool:
-   queen_steps = [north, south, east, west, north_west, north_east, south_west, south_east]
-   return slide_moves(start_idx, board, queen_steps)
-
-def king_moves(start_idx : int, board : Board ) -> bool:
+def king_moves(board : Board, start_idx : int) -> bool:
    result = []
    piece = board.array[start_idx]
    # White/black pieces move in positve/negative direction up the board
@@ -139,20 +163,20 @@ def king_moves(start_idx : int, board : Board ) -> bool:
          continue
       elif pt.sgn(piece) == pt.sgn(end_value):           # Do not capture friendly pieces
          continue
-      elif (pt.sgn(piece)*pt.sgn(end_value) == -1):      # Capture enemy pieces
+      elif (piece*end_value < 0):      # Capture enemy pieces
          result.append(target_idx)
       elif end_value == 0:                         # Move to an empty square
          result.append(target_idx)
    return result
 
-def slide_moves(start_idx : int, board : Board, steps : list) -> list:
+def slide_moves(board : Board, start_idx : int, steps : list) -> list:
    result = []
    piece = board.array[start_idx]
    direction = pt.sgn(piece)
 
    for step in steps:
          curr_idx = start_idx
-   
+
          while True:
             curr_idx = curr_idx + direction*step
             end_value = board.array[curr_idx]
@@ -164,7 +188,8 @@ def slide_moves(start_idx : int, board : Board, steps : list) -> list:
             elif pt.sgn(piece) == pt.sgn(end_value): 
                break
             # Capture oppossing pieces and then stop
-            elif (pt.sgn(piece)*pt.sgn(end_value) == -1 ):
+            elif (piece*end_value < 0 ):
+            # Check if this casues check:
                result.append(curr_idx)
                break
             # Move to empty square and keep searching
@@ -172,20 +197,20 @@ def slide_moves(start_idx : int, board : Board, steps : list) -> list:
                result.append(curr_idx)
    return result
 
-def in_check(board : Board, king_location : int):
+# In Check?
+def in_check(board : Board, king_loc: int) -> bool:
    # We check if a King is in check by verifying if a King can 'see' any opposing piece
    # with the vision of an amazon piece (queen + knight).
    
-   king_piece = board.array[king_location]
+   king_piece = board.array[king_loc]
 
    # Get list of squares seen by King with each piece type's vision
    ## Room to optimise here, we double check some squares with king_squares
-   pawn_squares = pawn_captures(king_location,board)
-   knight_squares = knight_moves(king_location, board)
-   bishop_squares = bishop_moves(king_location, board)
-   rook_squares = rook_moves(king_location, board)
-   king_squares = king_moves(king_location,board)
-
+   pawn_squares = pawn_captures(board, king_loc)
+   knight_squares = knight_moves(board, king_loc)
+   bishop_squares = bishop_moves(board, king_loc)
+   rook_squares = rook_moves(board, king_loc)
+   king_squares = king_moves(board, king_loc)
    # Iterate through list of squares seen by King and check if they contain opposing 
    # pieces with matching vision.
    for piece_types, piece_squares in zip([[1],[2],[3,5],[4,5],[6]],[pawn_squares, knight_squares,bishop_squares,rook_squares,king_squares]):
@@ -194,4 +219,3 @@ def in_check(board : Board, king_location : int):
             return True
    
    return False
-

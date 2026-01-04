@@ -2,6 +2,9 @@ import board_tools as bt
 import parse_tools as pt
 import move
 
+#TODO:
+# push_san(self, san_move : str)
+
 class Board:
    """
    Board object is a container game data and methods to manipulate that data.
@@ -18,6 +21,7 @@ class Board:
       self.half_move = int(self.half_move)
       self.full_move = int(self.full_move)
       self.history = []
+      self.kings_locs = bt.find_kings(self)
 
    def __str__(self):
       print("—"*72)
@@ -34,8 +38,7 @@ class Board:
       print("—"*72, end = '')
       return ""
 
-   def push_lan(self, lan : str) -> Board: #lan here is long algebraic notation
-      from_square, to_square = pt.convert_lan(lan)
+   def push(self, from_square : int, to_square : int) -> Board:
       from_piece = self.array[from_square]
       to_piece = self.array[to_square]
 
@@ -47,25 +50,23 @@ class Board:
       self.array[to_square] = from_piece
       self.array[from_square] = 0
 
-      # Update active_color and move count
-      if self.active_color == 'b': 
-         self.active_color = 'w'
-      else: self.active_color = 'b'
-      
-      self.full_move += 1
-      self.half_move += 1
- 
-      return self
+      # Check if the moved piece was the king and update location
+      if from_piece == 6:
+         self.kings_locs[0] = to_square
+      elif from_piece ==  -6:
+         self.kings_locs[1] = to_square
 
-   def push_san() -> Board:
-      #TODO:
-      return self
-   
+   def push_lan(self, lan : str) -> Board: #lan here is long algebraic notation
+      from_square, to_square = pt.convert_lan(lan)
+      return push(self, from_square, to_square)
+
+   def push_idx(self, from_square : int, to_square : int) -> Board:
+      return self.push(from_square, to_square)
+
    def pop(self) -> str:
       """
-      Returns the LAN representation string of the last move pushed.
+         Returns the LAN representation string of the last move pushed.
       """
-
       # Extract last move from board.history
       try:
          last_move = self.history.pop()
@@ -88,6 +89,12 @@ class Board:
 
       self.full_move += -1
       self.half_move += -1
+
+      if from_piece == 6:
+         self.kings_locs[0] = from_square
+      elif from_piece ==  -6:
+         self.kings_locs[1] = from_square
+
 
       return last_move
 
