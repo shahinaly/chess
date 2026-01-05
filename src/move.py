@@ -27,6 +27,9 @@ class Move:
       self.from_piece = from_piece
       self.to_piece = to_piece
 
+# High-level callers, for lack of a better term
+def get_all_moves():
+
 def get_legal_moves(board : Board, start_idx : int, san_flag = False) -> list:
    all_moves = get_moves(board, start_idx, False)
    result = []
@@ -38,7 +41,6 @@ def get_legal_moves(board : Board, start_idx : int, san_flag = False) -> list:
          else:
             result.append(move)
       board.pop()
-   print(move)
    return result
 
 def get_moves(board : Board, loc : int, san_flag = False) -> list:
@@ -50,7 +52,8 @@ def get_moves(board : Board, loc : int, san_flag = False) -> list:
    if (type(loc) == str) :
       loc = convert_loc(loc)
    piece = board.array[loc]
-   if piece == None or piece == 0 : return []
+
+   if piece == None or piece == 0 or board.active_color*piece < 0 : return []
 
    moves_fcts = [pawn_moves, knight_moves, bishop_moves, rook_moves, queen_moves, king_moves]
    if san_flag:

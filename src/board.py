@@ -20,6 +20,7 @@ class Board:
       self.array = bt.make_board(self.fen)
       self.half_move = int(self.half_move)
       self.full_move = int(self.full_move)
+      self.active_color = 1 if self.active_color == 'w' else -1
       self.history = []
       self.kings_locs = bt.find_kings(self)
 
@@ -28,7 +29,7 @@ class Board:
       bt.print_board_array(self)
       print("—"*72)
       print(
-         "Active color:             " + self.active_color,
+         "Active color:             " + ('w' if self.active_color == 1 else 'b'),
          "Current Move number:      " + str(self.full_move),
          "Castling:                 " + self.castling,
          "En passant:               " + self.en_passant,
@@ -56,9 +57,17 @@ class Board:
       elif from_piece ==  -6:
          self.kings_locs[1] = to_square
 
+      # Update active color
+      self.active_color = -1 * self.active_color
+
+      # Update Move Number
+      self.half_move += 1
+      if self.active_color == 1: self.full_move += 1
+
+
    def push_lan(self, lan : str) -> Board: #lan here is long algebraic notation
       from_square, to_square = pt.convert_lan(lan)
-      return push(self, from_square, to_square)
+      return self.push(from_square, to_square)
 
    def push_idx(self, from_square : int, to_square : int) -> Board:
       return self.push(from_square, to_square)
@@ -83,18 +92,16 @@ class Board:
       self.array[from_square] = from_piece
       
       # Revert changes to active_color and move count
-      if self.active_color == 'b': 
-         self.active_color = 'w'
-      else: self.active_color = 'b'
-
-      self.full_move += -1
+      self.active_color = -1 * self.active_color 
+      
+      # Update Move Number
       self.half_move += -1
+      if self.active_color == -1: self.full_move += -1
 
       if from_piece == 6:
          self.kings_locs[0] = from_square
       elif from_piece ==  -6:
          self.kings_locs[1] = from_square
-
 
       return last_move
 

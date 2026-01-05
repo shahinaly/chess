@@ -17,5 +17,5 @@ Rough Outline of things that need to happen:
       - Castling
     - ~Make move~
     - ~Unmake move~
-    - In check?
+    - ~In check?~
     - Promote
