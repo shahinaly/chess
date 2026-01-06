@@ -28,9 +28,27 @@ class Move:
       self.to_piece = to_piece
 
 # High-level callers, for lack of a better term
-def get_all_moves():
+def get_all_moves(board : Board):
 
+   # Retrieve active_color
+   active_color = board.active_color
+   
+   # Result 
+   result = {}
+
+   # Move through all squares
+   for square_idx in range(len(board.array)):
+      temp_moves = get_legal_moves(board, square_idx, True)
+      if len(temp_moves) > 0:
+         result[pt.convert_loc(square_idx)] = get_legal_moves(board, square_idx, True)
+   return result 
+   
 def get_legal_moves(board : Board, start_idx : int, san_flag = False) -> list:
+
+   # If not turn to move, return empty array, else find legal moves
+   if not(board.array[start_idx] is None) and not(turn_to_move(board.array[start_idx], board.active_color)): 
+      return []
+   # Find all moves first, then filter ones which puts King in check
    all_moves = get_moves(board, start_idx, False)
    result = []
    for move in all_moves:
@@ -222,3 +240,10 @@ def in_check(board : Board, king_loc: int) -> bool:
             return True
    
    return False
+
+# Helpers
+def turn_to_move(piece : int, active_color : int ) -> bool :
+   if piece is None or active_color is None:
+      print(f"piece is {piece}")
+      print(f"active_color is {active_color}")
+   return active_color * piece > 0
