@@ -53,7 +53,7 @@ def get_legal_moves(board : Board, start_idx : int, san_flag = False) -> list:
    result = []
    for move in all_moves:
       board.push_idx(start_idx, move)
-      if not(in_check(board, move)):
+      if not(in_check(board)):
          if san_flag:
             result.append(pt.convert_loc(move))
          else:
@@ -219,11 +219,14 @@ def slide_moves(board : Board, start_idx : int, steps : list) -> list:
    return result
 
 # In Check?
-def in_check(board : Board, king_loc: int) -> bool:
+def in_check(board : Board) -> bool:
    # We check if a King is in check by verifying if a King can 'see' any opposing piece
    # with the vision of an amazon piece (queen + knight).
    
-   king_piece = board.array[king_loc]
+   active_color = board.active_color
+   
+   # Pick right king location based on active_color
+   king_loc = board.kings_locs[(1 - active_color) // 2] 
 
    # Get list of squares seen by King with each piece type's vision
    ## Room to optimise here, we double check some squares with king_squares
@@ -236,14 +239,11 @@ def in_check(board : Board, king_loc: int) -> bool:
    # pieces with matching vision.
    for piece_types, piece_squares in zip([[1],[2],[3,5],[4,5],[6]],[pawn_squares, knight_squares,bishop_squares,rook_squares,king_squares]):
       for square in piece_squares:
-         if (abs(board.array[square]) in piece_types) and board.array[square]*king_piece < 0 :
+         if (abs(board.array[square]) in piece_types) and board.array[square]*active_color < 0 :
             return True
    
    return False
 
 # Helpers
 def turn_to_move(piece : int, active_color : int ) -> bool :
-   if piece is None or active_color is None:
-      print(f"piece is {piece}")
-      print(f"active_color is {active_color}")
    return active_color * piece > 0
