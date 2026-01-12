@@ -2,6 +2,7 @@ import parse_tools as pt
 import board
 # Not the best, but Black is not affected becuase color determines
 # orientation and therefore sign of the travel step.
+
 north = 12
 south = -12
 east = 1
@@ -21,12 +22,19 @@ piece_steps = {
 }
 
 class Move:
-   def __init__(self, from_square : int, to_square : int, from_piece : int, to_piece : int):
+   def __init__(self, from_square : int, to_square : int, from_piece : int, to_piece : int, en_passant : str):
       self.from_square = from_square
       self.to_square = to_square
       self.from_piece = from_piece
       self.to_piece = to_piece
-
+      self.en_passant = en_passant
+   def __str__(self):
+      print(f"From: {pt.convert_loc(self.from_square)}")
+      print(f"Piece: {self.from_piece}")
+      print(f"To:   {pt.convert_loc(self.to_square)}")
+      print(f"Piece: {self.to_piece}")
+      print(f"en_passant: {self.en_passant}")
+      return ""
 # High-level callers, for lack of a better term
 def get_all_moves(board : Board):
 
@@ -81,7 +89,6 @@ def get_moves(board : Board, loc : int, san_flag = False) -> list:
 
 # Callers, for lack of a better term
 def pawn_moves(board : Board, start_idx : int) -> list:
-   #TODO: Add en passant
 
    # just to allow testing using alegbraic notation
    if (type(start_idx) == str) :
@@ -143,7 +150,12 @@ def pawn_captures(board : Board, start_idx : int) -> list:
    
       if ( end_value is not None and piece*end_value < 0 ) :
          result.append(target_idx)
+      
+      # en passant
+      elif pt.convert_loc(target_idx) == board.en_passant:
+         result.append(target_idx)
 
+      
    return result
 
 def knight_moves(board : Board, start_idx : int) -> list:
@@ -247,3 +259,18 @@ def in_check(board : Board) -> bool:
 # Helpers
 def turn_to_move(piece : int, active_color : int ) -> bool :
    return active_color * piece > 0
+
+def is_enpassantable(board : Board, start_idx : int, end_idx : int):
+   # Check is done before pieces are moved on the board
+   result = False
+   piece = board.array[start_idx]
+   east_piece = board.array[end_idx + east]
+   west_piece = board.array[end_idx + west]
+   # Double jump
+   if abs(start_idx - end_idx) == north * 2 and abs(piece) == 1:
+      # Not None and has adjacent opposing pawns
+      if east_piece and east_piece * piece == -1:
+         result = True
+      elif west_piece and west_piece * piece == -1:
+         result = True
+   return result

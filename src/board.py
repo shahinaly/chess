@@ -42,20 +42,27 @@ class Board:
    def push(self, from_square : int, to_square : int) -> Board:
       from_piece = self.array[from_square]
       to_piece = self.array[to_square]
+      direction = pt.sgn(from_piece)
 
-      # Update history
-      ## Create Move object to capture move data
-      self.history.append(move.Move(from_square,to_square, from_piece, to_piece))
-
-      # Update board by replacing elements
-      self.array[to_square] = from_piece
-      self.array[from_square] = 0
-
-      # Check if the moved piece was the king and update location
+     
+      # Check if the moving piece is the king and update location
       if from_piece == 6:
          self.kings_locs[0] = to_square
       elif from_piece ==  -6:
          self.kings_locs[1] = to_square
+
+      # Update history
+      ## Create Move object to capture move data
+      this_move = move.Move(from_square,to_square, from_piece, to_piece, self.en_passant)
+      self.history.append(this_move)
+ 
+      # Check if the moving piece was a double jump and update en_passant
+      # flag if adjancent squares can see it.
+      if move.is_enpassantable(self, from_square, to_square):
+         self.en_passant = pt.convert_loc(to_square - direction*move.north)
+      else:
+         self.en_passant = '-'
+
 
       # Update active color
       self.active_color = -1 * self.active_color
@@ -64,6 +71,11 @@ class Board:
       self.half_move += 1
       if self.active_color == 1: self.full_move += 1
 
+      # Update board by replacing elements
+      self.array[to_square] = from_piece
+      self.array[from_square] = 0
+      
+      return this_move
 
    def push_lan(self, lan : str) -> Board: #lan here is long algebraic notation
       from_square, to_square = pt.convert_lan(lan)
@@ -98,10 +110,14 @@ class Board:
       self.half_move += -1
       if self.active_color == -1: self.full_move += -1
 
+      # Revert changes to King location
       if from_piece == 6:
          self.kings_locs[0] = from_square
       elif from_piece ==  -6:
          self.kings_locs[1] = from_square
 
+      # Revert changes to en_passant
+      self.en_passant = last_move.en_passant
+      
       return last_move
 
