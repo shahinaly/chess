@@ -42,6 +42,7 @@ class Board:
    def push(self, from_square : int, to_square : int) -> Board:
       from_piece = self.array[from_square]
       to_piece = self.array[to_square]
+      en_passant = self.en_passant
       direction = pt.sgn(from_piece)
 
      
@@ -50,11 +51,6 @@ class Board:
          self.kings_locs[0] = to_square
       elif from_piece ==  -6:
          self.kings_locs[1] = to_square
-
-      # Update history
-      ## Create Move object to capture move data
-      this_move = move.Move(from_square,to_square, from_piece, to_piece, self.en_passant)
-      self.history.append(this_move)
  
       # Check if the moving piece was a double jump and update en_passant
       # flag if adjancent squares can see it.
@@ -62,7 +58,6 @@ class Board:
          self.en_passant = pt.convert_loc(to_square - direction*move.north)
       else:
          self.en_passant = '-'
-
 
       # Update active color
       self.active_color = -1 * self.active_color
@@ -75,6 +70,15 @@ class Board:
       self.array[to_square] = from_piece
       self.array[from_square] = 0
       
+      # Update history
+      ## Create Move object to capture move data
+      this_move = move.Move(from_square,to_square, from_piece, to_piece, en_passant)
+
+      if abs(from_piece) == 1 and pt.convert_loc(to_square) == en_passant:
+         this_move.en_passanted = to_square - direction*move.north
+         self.array[to_square - direction*move.north] = 0
+      self.history.append(this_move)
+
       return this_move
 
    def push_lan(self, lan : str) -> Board: #lan here is long algebraic notation
@@ -103,6 +107,10 @@ class Board:
       self.array[to_square] = to_piece
       self.array[from_square] = from_piece
       
+      if last_move.en_passanted :
+         # if the last move was an en passant, retrieve the square idx of the
+         # en_passanted piece and place a pawn of the opposite color to the moved piece
+         self.array[last_move.en_passanted] = -1*from_piece
       # Revert changes to active_color and move count
       self.active_color = -1 * self.active_color 
       
@@ -118,6 +126,6 @@ class Board:
 
       # Revert changes to en_passant
       self.en_passant = last_move.en_passant
-      
+
       return last_move
 

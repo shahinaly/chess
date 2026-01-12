@@ -22,12 +22,14 @@ piece_steps = {
 }
 
 class Move:
-   def __init__(self, from_square : int, to_square : int, from_piece : int, to_piece : int, en_passant : str):
+   def __init__(self, from_square : int, to_square : int, from_piece : int, to_piece : int, en_passant : str, en_passanted : int = 0):
       self.from_square = from_square
       self.to_square = to_square
       self.from_piece = from_piece
       self.to_piece = to_piece
-      self.en_passant = en_passant
+      self.en_passant = en_passant # State before move 
+      self.en_passanted = en_passanted
+
    def __str__(self):
       print(f"From: {pt.convert_loc(self.from_square)}")
       print(f"Piece: {self.from_piece}")
@@ -154,7 +156,6 @@ def pawn_captures(board : Board, start_idx : int) -> list:
       # en passant
       elif pt.convert_loc(target_idx) == board.en_passant:
          result.append(target_idx)
-
       
    return result
 
