@@ -13,7 +13,7 @@ Rough Outline of things that need to happen:
     - Find Moves
       - ~Piece movement~
       - ~Pawn movement~
-      - en-passant
+      - ~en-passant~
       - Castling
     - ~Make move~
     - ~Unmake move~

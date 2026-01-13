@@ -3,22 +3,22 @@ import board
 # Not the best, but Black is not affected becuase color determines
 # orientation and therefore sign of the travel step.
 
-north = 12
-south = -12
-east = 1
-west = -1
-north_east = 13
-north_west = 11
-south_east = -11
-south_west = -13
+NORTH = 12
+SOUTH = -12
+EAST = 1
+WEST = -1
+NORTH_EAST = 13
+NORTH_WEST = 11
+SOUTH_EAST = -11
+SOUTH_WEST = -13
 
 piece_steps = {
-   1 : [north, north_west, north_east],
+   1 : [NORTH, NORTH_WEST, NORTH_EAST],
    2 : [10,23,25,14,-10,-23,-25,-14],
-   3 : [north_west, north_east, south_west, south_east],
-   4 : [north, south, east, west],
-   5 : [north,south, east, west, north_east, north_west, south_east, south_west],
-   6 : [north,south, east, west, north_east, north_west, south_east, south_west]
+   3 : [NORTH_WEST, NORTH_EAST, SOUTH_WEST, SOUTH_EAST],
+   4 : [NORTH, SOUTH, EAST, WEST],
+   5 : [NORTH,SOUTH, EAST, WEST, NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST],
+   6 : [NORTH,SOUTH, EAST, WEST, NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST]
 }
 
 class Move:
@@ -45,7 +45,7 @@ def get_all_moves(board : Board):
    
    # Result 
    result = {}
-   print("hello")
+
    # Move through all squares
    for square_idx in range(len(board.array)):
       temp_moves = get_legal_moves(board, square_idx, True)
@@ -100,15 +100,15 @@ def pawn_moves(board : Board, start_idx : int) -> list:
    return pawn_walks(board, start_idx) + pawn_captures(board, start_idx)
 
 def bishop_moves(board : Board, start_idx : int) -> bool:
-   bishop_steps = [north_west, north_east, south_west, south_east]
+   bishop_steps = [NORTH_WEST, NORTH_EAST, SOUTH_WEST, SOUTH_EAST]
    return slide_moves(board, start_idx, bishop_steps)
 
 def rook_moves(board : Board, start_idx : int) -> bool:
-   rook_steps = [north, south, east, west]
+   rook_steps = [NORTH, SOUTH, EAST, WEST]
    return slide_moves(board, start_idx, rook_steps)
 
 def queen_moves(board : Board, start_idx : int) -> bool:
-   queen_steps = [north, south, east, west, north_west, north_east, south_west, south_east]
+   queen_steps = [NORTH, SOUTH, EAST, WEST, NORTH_WEST, NORTH_EAST, SOUTH_WEST, SOUTH_EAST]
    return slide_moves(board, start_idx, queen_steps)
 
 # Calculators, for lack of a better term
@@ -121,7 +121,7 @@ def pawn_walks(board : Board, start_idx : int) -> list:
    # On starting row?
    on_starting_row = start_idx // 12 in [3,8]
    
-   for step in [north, north*2]:
+   for step in [NORTH, NORTH*2]:
 
       target_idx = start_idx + direction*step
       end_value = board.array[target_idx]
@@ -130,11 +130,11 @@ def pawn_walks(board : Board, start_idx : int) -> list:
       if (end_value is None or end_value != 0):
          break
       # Move forward an empty square
-      elif step == north:
+      elif step == NORTH:
          result.append(target_idx)
       # Allow two step if on starting rank
       ## Note that first condition guarantees no blocking piece
-      elif on_starting_row and step == north*2 and end_value == 0:
+      elif on_starting_row and step == NORTH*2 and end_value == 0:
          result.append(target_idx)
 
    return result
@@ -147,7 +147,7 @@ def pawn_captures(board : Board, start_idx : int) -> list:
    # White/black pieces move in positve/negative direction up the board
    direction = pt.sgn(piece)
 
-   for step in [north_west, north_east]:
+   for step in [NORTH_WEST, NORTH_EAST]:
       target_idx = start_idx + direction*step
       end_value = board.array[target_idx]
    
@@ -190,7 +190,7 @@ def king_moves(board : Board, start_idx : int) -> bool:
    # White/black pieces move in positve/negative direction up the board
    direction = pt.sgn(piece)  
 
-   for step in [north, south, east, west, north_west, north_east, south_west, south_east]:
+   for step in [NORTH, SOUTH, EAST, WEST, NORTH_WEST, NORTH_EAST, SOUTH_WEST, SOUTH_EAST]:
       target_idx = start_idx + direction*step
       end_value = board.array[target_idx]
    
@@ -238,7 +238,12 @@ def in_check(board : Board, active_color : int) -> bool:
    # with the vision of an amazon piece (queen + knight).
   
    # Pick right king location based on active_color
-   king_loc = board.kings_locs[(1 - active_color) // 2] 
+   if active_color > 0:
+      king_loc = board.white_king
+   elif active_color < 0:
+      king_loc = board.black_king
+   else:
+      print("inccorect active_color '0' passed to in_check")
 
    # Get list of squares seen by King with each piece type's vision
    ## Room to optimise here, we double check some squares with king_squares
@@ -265,13 +270,13 @@ def is_enpassantable(board : Board, start_idx : int, end_idx : int):
    # Check is done before pieces are moved on the board
    result = False
    piece = board.array[start_idx]
-   east_piece = board.array[end_idx + east]
-   west_piece = board.array[end_idx + west]
+   EAST_piece = board.array[end_idx + EAST]
+   WEST_piece = board.array[end_idx + WEST]
    # Double jump
-   if abs(start_idx - end_idx) == north * 2 and abs(piece) == 1:
+   if abs(start_idx - end_idx) == NORTH * 2 and abs(piece) == 1:
       # Not None and has adjacent opposing pawns
-      if east_piece and east_piece * piece == -1:
+      if EAST_piece and EAST_piece * piece == -1:
          result = True
-      elif west_piece and west_piece * piece == -1:
+      elif WEST_piece and WEST_piece * piece == -1:
          result = True
    return result

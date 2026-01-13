@@ -22,7 +22,7 @@ class Board:
       self.full_move = int(self.full_move)
       self.active_color = 1 if self.active_color == 'w' else -1
       self.history = []
-      self.kings_locs = bt.find_kings(self)
+      self.white_king, self.black_king = bt.find_kings(self)
 
    def __str__(self):
       print("—"*72)
@@ -48,14 +48,14 @@ class Board:
      
       # Check if the moving piece is the king and update location
       if from_piece == 6:
-         self.kings_locs[0] = to_square
+         self.white_king = to_square
       elif from_piece ==  -6:
-         self.kings_locs[1] = to_square
+         self.black_king = to_square
  
       # Check if the moving piece was a double jump and update en_passant
       # flag if adjancent squares can see it.
       if move.is_enpassantable(self, from_square, to_square):
-         self.en_passant = pt.convert_loc(to_square - direction*move.north)
+         self.en_passant = pt.convert_loc(to_square - direction*move.NORTH)
       else:
          self.en_passant = '-'
 
@@ -75,8 +75,8 @@ class Board:
       this_move = move.Move(from_square,to_square, from_piece, to_piece, en_passant)
 
       if abs(from_piece) == 1 and pt.convert_loc(to_square) == en_passant:
-         this_move.en_passanted = to_square - direction*move.north
-         self.array[to_square - direction*move.north] = 0
+         this_move.en_passanted = to_square - direction*move.NORTH
+         self.array[to_square - direction*move.NORTH] = 0
       self.history.append(this_move)
 
       return this_move
@@ -120,9 +120,9 @@ class Board:
 
       # Revert changes to King location
       if from_piece == 6:
-         self.kings_locs[0] = from_square
+         self.white_king = from_square
       elif from_piece ==  -6:
-         self.kings_locs[1] = from_square
+         self.black_king = from_square
 
       # Revert changes to en_passant
       self.en_passant = last_move.en_passant
