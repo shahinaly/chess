@@ -99,18 +99,20 @@ def pawn_moves(board : Board, start_idx : int) -> list:
 
    return pawn_walks(board, start_idx) + pawn_captures(board, start_idx)
 
-def bishop_moves(board : Board, start_idx : int) -> bool:
+def bishop_moves(board : Board, start_idx : int) -> list:
    bishop_steps = [NORTH_WEST, NORTH_EAST, SOUTH_WEST, SOUTH_EAST]
    return slide_moves(board, start_idx, bishop_steps)
 
-def rook_moves(board : Board, start_idx : int) -> bool:
+def rook_moves(board : Board, start_idx : int) -> list:
    rook_steps = [NORTH, SOUTH, EAST, WEST]
    return slide_moves(board, start_idx, rook_steps)
 
-def queen_moves(board : Board, start_idx : int) -> bool:
+def queen_moves(board : Board, start_idx : int) -> list:
    queen_steps = [NORTH, SOUTH, EAST, WEST, NORTH_WEST, NORTH_EAST, SOUTH_WEST, SOUTH_EAST]
    return slide_moves(board, start_idx, queen_steps)
 
+def king_moves(board : Board, start_idx : int) -> list:
+   return king_walks(board, start_idx) + king_castles(board, start_idx)
 # Calculators, for lack of a better term
 def pawn_walks(board : Board, start_idx : int) -> list:
    result = []
@@ -184,7 +186,7 @@ def knight_moves(board : Board, start_idx : int) -> list:
          result.append(end_idx)                                  # or jump to empty square
    return result
 
-def king_moves(board : Board, start_idx : int) -> bool:
+def king_walks(board : Board, start_idx : int) -> bool:
    result = []
    piece = board.array[start_idx]
    # White/black pieces move in positve/negative direction up the board
@@ -202,6 +204,34 @@ def king_moves(board : Board, start_idx : int) -> bool:
          result.append(target_idx)
       elif end_value == 0:                         # Move to an empty square
          result.append(target_idx)
+   return result
+
+def king_castles(board : Board, start_idx : int) -> list:
+   # Conditions for castling:
+   # 1. Castling path cannot be blocked by any piece on any side
+   # 2. King cannot be in check at any point along castling path
+   # 3. Must be both King and Rook's first move. 
+   
+   result = []
+   piece = board.array[start_idx]
+
+   for step in [EAST, EAST*2]:
+      target_idx = start_idx + step
+      end_value = board.array[target_idx]
+      
+
+      #TODO: Fix this monstrosity
+      # Cannot be blocked by any piece whatsoever:
+      if end_value == 0:
+         board.push_idx(start_idx, target_idx)
+         if not(in_check(board, piece)):
+            if step == EAST*2:
+               result.append(target_idx)
+         else:
+            board.pop()
+            break
+      else:
+         break
    return result
 
 def slide_moves(board : Board, start_idx : int, steps : list) -> list:
@@ -251,7 +281,7 @@ def in_check(board : Board, active_color : int) -> bool:
    knight_squares = knight_moves(board, king_loc)
    bishop_squares = bishop_moves(board, king_loc)
    rook_squares = rook_moves(board, king_loc)
-   king_squares = king_moves(board, king_loc)
+   king_squares = king_walks(board, king_loc)
    # Iterate through list of squares seen by King and check if they contain opposing 
    # pieces with matching vision.
    for piece_types, piece_squares in zip([[1],[2],[3,5],[4,5],[6]],[pawn_squares, knight_squares,bishop_squares,rook_squares,king_squares]):
