@@ -263,7 +263,7 @@ def slide_moves(board : Board, start_idx : int, steps : list) -> list:
    return result
 
 # In Check?
-def in_check(board : Board, active_color : int) -> bool:
+def in_check(board : Board, active_color : int = 0) -> bool:
    # We check if a King is in check by verifying if a King can 'see' any opposing piece
    # with the vision of an amazon piece (queen + knight).
   
@@ -273,7 +273,11 @@ def in_check(board : Board, active_color : int) -> bool:
    elif active_color < 0:
       king_loc = board.black_king
    else:
-      print("inccorect active_color '0' passed to in_check")
+      return in_check(board,1) or in_check(board, -1)
+
+   
+   if king_loc is None:
+      return False
 
    # Get list of squares seen by King with each piece type's vision
    ## Room to optimise here, we double check some squares with king_squares
