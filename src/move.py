@@ -214,24 +214,24 @@ def king_castles(board : Board, start_idx : int) -> list:
    
    result = []
    piece = board.array[start_idx]
+   direction_steps = get_castling_steps(board, start_idx)
 
-   for step in [EAST, EAST*2]:
-      target_idx = start_idx + step
-      end_value = board.array[target_idx]
-      
-
-      #TODO: Fix this monstrosity
-      # Cannot be blocked by any piece whatsoever:
-      if end_value == 0:
-         board.push_idx(start_idx, target_idx)
-         if not(in_check(board, piece)):
-            if step == EAST*2:
-               result.append(target_idx)
-         else:
+   for direction in direction_steps:
+      for step in direction:
+         target_idx = start_idx + step
+         end_value = board.array[target_idx]
+   
+         # Cannot be blocked by any piece whatsoever:
+         if end_value != 0:
+            break
+         # Cannot be in check at any point along path:
+         elif board.push_idx(start_idx, target_idx) and in_check(board, piece):
             board.pop()
             break
-      else:
-         break
+         # Pop from previous condition and if at final square append it.
+         elif board.pop() and abs(step) == EAST*2:
+            result.append(target_idx)
+   
    return result
 
 def slide_moves(board : Board, start_idx : int, steps : list) -> list:
@@ -313,4 +313,21 @@ def is_enpassantable(board : Board, start_idx : int, end_idx : int):
          result = True
       elif WEST_piece and WEST_piece * piece == -1:
          result = True
+   return result
+
+def get_castling_steps(board : Board, start_idx : int) -> list
+   result = []
+   piece = board.array[start_idx]
+
+   if piece < 0:
+      if 'k' in board.castling:
+         direction_steps.append([EAST, EAST*2])
+      if 'q' in board.castling:
+         direction_steps.append([WEST, WEST*2])
+   elif piece > 0 :
+      if 'K' in board.castling:
+         direction_steps.append([EAST, EAST*2])
+      if 'Q' in board.castling:
+         direction_steps.append([WEST, WEST*2])
+
    return result
