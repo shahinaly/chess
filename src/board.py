@@ -9,7 +9,10 @@ class Board:
    """
    Board object is a container game data and methods to manipulate that data.
    """
-   def __init__( self, fen: str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"):
+   def __init__(
+         self, 
+         fen:str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"):
+
       (self.fen,
        self.active_color,
        self.castling,
@@ -46,18 +49,13 @@ class Board:
       direction = pt.sgn(from_piece)
 
      
-      # Check if the moving piece is the king and update location
-      if from_piece == 6:
-         self.white_king = to_square
-      elif from_piece ==  -6:
-         self.black_king = to_square
- 
-      # Check if the moving piece was a double jump and update en_passant
-      # flag if adjancent squares can see it.
-      if move.is_enpassantable(self, from_square, to_square):
-         self.en_passant = pt.convert_loc(to_square - direction*move.NORTH)
-      else:
-         self.en_passant = '-'
+      # Check if the moving piece is the king and update location and castling 
+      # rights.
+      bt.update_castling_rights(self, from_square, to_square)
+
+      # Check if the moving piece was a double jump and update en_passant flag
+      # if adjancent squares can see it.
+      bt.update_en_passant(self, from_square, to_square)
 
       # Update active color
       self.active_color = -1 * self.active_color
@@ -72,7 +70,8 @@ class Board:
       
       # Update history
       ## Create Move object to capture move data
-      this_move = move.Move(from_square,to_square, from_piece, to_piece, en_passant)
+      this_move = move.Move(from_square,to_square, from_piece, to_piece, 
+                            en_passant)
 
       if abs(from_piece) == 1 and pt.convert_loc(to_square) == en_passant:
          this_move.en_passanted = to_square - direction*move.NORTH
@@ -109,7 +108,8 @@ class Board:
       
       if last_move.en_passanted :
          # if the last move was an en passant, retrieve the square idx of the
-         # en_passanted piece and place a pawn of the opposite color to the moved piece
+         # en_passanted piece and place a pawn of the opposite color to the 
+         # moved piece.
          self.array[last_move.en_passanted] = -1*from_piece
       # Revert changes to active_color and move count
       self.active_color = -1 * self.active_color 

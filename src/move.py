@@ -315,19 +315,19 @@ def is_enpassantable(board : Board, start_idx : int, end_idx : int):
          result = True
    return result
 
-def get_castling_steps(board : Board, start_idx : int) -> list
+def get_castling_steps(board : Board, start_idx : int) -> list:
    result = []
    piece = board.array[start_idx]
 
    if piece < 0:
       if 'k' in board.castling:
-         direction_steps.append([EAST, EAST*2])
+         result.append([EAST, EAST*2])
       if 'q' in board.castling:
-         direction_steps.append([WEST, WEST*2])
+         result.append([WEST, WEST*2])
    elif piece > 0 :
       if 'K' in board.castling:
-         direction_steps.append([EAST, EAST*2])
+         result.append([EAST, EAST*2])
       if 'Q' in board.castling:
-         direction_steps.append([WEST, WEST*2])
+         result.append([WEST, WEST*2])
 
    return result
