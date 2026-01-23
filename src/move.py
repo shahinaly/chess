@@ -3,55 +3,65 @@ import board
 # Not the best, but Black is not affected becuase color determines
 # orientation and therefore sign of the travel step.
 
-NORTH = 12
-SOUTH = -12
-EAST = 1
-WEST = -1
-NORTH_EAST = 13
-NORTH_WEST = 11
-SOUTH_EAST = -11
-SOUTH_WEST = -13
+NORTH       = 12
+SOUTH       = -12
+EAST        = 1
+WEST        = -1
+NORTH_EAST  = 13
+NORTH_WEST  = 11
+SOUTH_EAST  = -11
+SOUTH_WEST  = -13
 
 piece_steps = {
    1 : [NORTH, NORTH_WEST, NORTH_EAST],
-   2 : [10,23,25,14,-10,-23,-25,-14],
+   2 : [10, 23, 25, 14, -10, -23, -25, -14], # Knight moves
    3 : [NORTH_WEST, NORTH_EAST, SOUTH_WEST, SOUTH_EAST],
    4 : [NORTH, SOUTH, EAST, WEST],
-   5 : [NORTH,SOUTH, EAST, WEST, NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST],
-   6 : [NORTH,SOUTH, EAST, WEST, NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST]
+   5 : [NORTH, SOUTH, EAST, WEST, NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST],
+   6 : [NORTH, SOUTH, EAST, WEST, NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST]
 }
 
 class Move:
-   def __init__(self, from_square : int, to_square : int, from_piece : int, to_piece : int, en_passant : str, en_passanted : int = 0):
-      self.from_square = from_square
-      self.to_square = to_square
-      self.from_piece = from_piece
-      self.to_piece = to_piece
-      self.en_passant = en_passant # State before move 
-      self.en_passanted = en_passanted
+   def __init__(self,
+                from_square   : int,   to_square      : int,
+                from_piece    : int,   to_piece       : int,
+                en_passant    : str,   en_passanted   : int = 0,
+                castling      : str = "KQkq"):
+
+      self.from_square     = from_square
+      self.to_square       = to_square
+      self.from_piece      = from_piece
+      self.to_piece        = to_piece
+      self.en_passant      = en_passant # State before move
+      self.en_passanted    = en_passanted
+      self.castling        = castling
 
    def __str__(self):
+
       print(f"From: {pt.convert_loc(self.from_square)}")
       print(f"Piece: {self.from_piece}")
       print(f"To:   {pt.convert_loc(self.to_square)}")
       print(f"Piece: {self.to_piece}")
       print(f"en_passant: {self.en_passant}")
+
       return ""
+
 # High-level callers, for lack of a better term
 def get_all_moves(board : Board):
 
    # Retrieve active_color
    active_color = board.active_color
-   
+
    # Result 
    result = {}
-
+   i = 0
    # Move through all squares
    for square_idx in range(len(board.array)):
       temp_moves = get_legal_moves(board, square_idx, True)
       if len(temp_moves) > 0:
          result[pt.convert_loc(square_idx)] = temp_moves
-   return result 
+
+   return result
    
 def get_legal_moves(board : Board, start_idx : int, san_flag = False) -> list:
 
@@ -78,6 +88,7 @@ def get_moves(board : Board, loc : int, san_flag = False) -> list:
    # - Piece Color
    # - In Check?
    # - 50 move rule
+
    if (type(loc) == str) :
       loc = convert_loc(loc)
    piece = board.array[loc]
@@ -113,16 +124,17 @@ def queen_moves(board : Board, start_idx : int) -> list:
 
 def king_moves(board : Board, start_idx : int) -> list:
    return king_walks(board, start_idx) + king_castles(board, start_idx)
+
 # Calculators, for lack of a better term
 def pawn_walks(board : Board, start_idx : int) -> list:
    result = []
    piece = board.array[start_idx]
 
    # White/black pieces move in positve/negative direction up the board
-   direction = pt.sgn(piece)  
+   direction = pt.sgn(piece)
    # On starting row?
    on_starting_row = start_idx // 12 in [3,8]
-   
+
    for step in [NORTH, NORTH*2]:
 
       target_idx = start_idx + direction*step
@@ -142,7 +154,7 @@ def pawn_walks(board : Board, start_idx : int) -> list:
    return result
 
 def pawn_captures(board : Board, start_idx : int) -> list:
-   
+
    result = []
    piece = board.array[start_idx]
 
@@ -152,14 +164,14 @@ def pawn_captures(board : Board, start_idx : int) -> list:
    for step in [NORTH_WEST, NORTH_EAST]:
       target_idx = start_idx + direction*step
       end_value = board.array[target_idx]
-   
+
       if ( end_value is not None and piece*end_value < 0 ) :
          result.append(target_idx)
-      
+
       # en passant
       elif pt.convert_loc(target_idx) == board.en_passant:
          result.append(target_idx)
-      
+
    return result
 
 def knight_moves(board : Board, start_idx : int) -> list:

@@ -19,7 +19,7 @@ class Board:
        self.en_passant,
        self.half_move,
        self.full_move) = fen.split()
-      
+
       self.array = bt.make_board(self.fen)
       self.half_move = int(self.half_move)
       self.full_move = int(self.full_move)
@@ -28,9 +28,11 @@ class Board:
       self.white_king, self.black_king = bt.find_kings(self)
 
    def __str__(self):
+
       print("—"*72)
       bt.print_board_array(self)
       print("—"*72)
+
       print(
          "Active color:             " + ('w' if self.active_color == 1 else 'b'),
          "Current Move number:      " + str(self.full_move),
@@ -46,9 +48,10 @@ class Board:
       from_piece = self.array[from_square]
       to_piece = self.array[to_square]
       en_passant = self.en_passant
+      castling = self.castling
       direction = pt.sgn(from_piece)
 
-     
+
       # Check if the moving piece is the king and update location and castling 
       # rights.
       bt.update_castling_rights(self, from_square, to_square)
@@ -67,11 +70,12 @@ class Board:
       # Update board by replacing elements
       self.array[to_square] = from_piece
       self.array[from_square] = 0
-      
+
       # Update history
       ## Create Move object to capture move data
-      this_move = move.Move(from_square,to_square, from_piece, to_piece, 
-                            en_passant)
+      this_move = move.Move(from_square,to_square, 
+                            from_piece, to_piece, 
+                            en_passant, castling = castling)
 
       if abs(from_piece) == 1 and pt.convert_loc(to_square) == en_passant:
          this_move.en_passanted = to_square - direction*move.NORTH
@@ -91,16 +95,17 @@ class Board:
       """
          Returns the LAN representation string of the last move pushed.
       """
+      
       # Extract last move from board.history
       try:
          last_move = self.history.pop()
       except Exception as e:
          return []
 
-      from_piece = last_move.from_piece
+      from_piece  = last_move.from_piece
       from_square = last_move.from_square
-      to_piece = last_move.to_piece
-      to_square = last_move.to_square
+      to_piece    = last_move.to_piece
+      to_square   = last_move.to_square
       
       # Revert changes to board elements
       self.array[to_square] = to_piece
@@ -124,8 +129,9 @@ class Board:
       elif from_piece ==  -6:
          self.black_king = from_square
 
-      # Revert changes to en_passant
-      self.en_passant = last_move.en_passant
+      # Revert changes to en_passant and castling
+      self.en_passant   = last_move.en_passant
+      self.castling     = last_move.castling
 
       return last_move
 
