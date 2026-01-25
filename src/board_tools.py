@@ -6,6 +6,11 @@ def print_board_array(self):
    # To print the board in a standard format, we must go in the following order:
    # 81...88/.../11...18
    for rank in reversed(range(12)):
+      if rank in [2,3,4,5,6,7,8,9]:
+         print(rank - 1, end = '|')
+      if rank == 0:
+         print("  -----------------------")
+         print("   A  B  C  D  E  F  G  H")
       for file in range(12):
          square = rank*12 + file # for when I mess up coorddinates, inevitably
          # print empty squares as '_'
@@ -68,35 +73,36 @@ def find_kings(board):
    return result 
 
 def update_meta(board: Board, from_square : int, to_square : int):
-   
    update_castling_rights(board, from_square, to_square)
    update_en_passant(board, from_square, to_square)
    update_turn_fields(board) # move number and active_color
 
-   # Update board by replacing elements
-   board.array[to_square] = from_piece
-   board.array[from_square] = 0
-
-def update_castling_rights(board : Board, from_square: int, to_square : int) -> bool:
-
-   from_piece = board.array[from_square]
-   if from_piece == 6:
+def update_castling_rights(board : Board, from_square: int, to_square : int) -> bool :
+   piece = board.array[from_square]
+   square = pt.convert_loc(from_square)
+   if square == 'a1' and piece == 4:
+      board.castling = board.castling.replace('Q','')
+   elif square == 'h1' and piece == 4:
+      board.castling = board.castling.replace('K','')
+   elif square == 'a8' and piece == -4:
+      board.castling = board.castling.replace('q','')
+   elif square == 'h8' and piece == -4:
+      board.castling = board.castling.replace('k','')
+   elif piece == 6:
       board.white_king = to_square
       board.castling = board.castling.replace('K','')
       board.castling = board.castling.replace('Q','')
       return True
-
-   elif from_piece ==  -6:
+   elif piece ==  -6:
       board.black_king = to_square
       board.castling = board.castling.replace('k','')
       board.castling = board.castling.replace('q','')
       return True
-
    else: 
       return False
 
 def update_en_passant(board: Board, from_square : int, to_square : int) -> bool:
-   
+
    direction = board.array[from_square] // abs(board.array[from_square])
 
    if move.is_enpassantable(board, from_square, to_square):
@@ -107,9 +113,21 @@ def update_en_passant(board: Board, from_square : int, to_square : int) -> bool:
    return True
 
 def update_turn_fields(board : Board):
-   self.active_color = -1 * self.active_color
-   self.half_move += 1
-   if self.active_color == 1: 
-      self.full_move += 1
+   board.active_color = -1 * board.active_color
+   board.half_move += 1
+   if board.active_color == 1: 
+      board.full_move += 1
+
+def is_en_passant(board : Board, from_square : int, to_square : int):
+   from_piece = board.array[from_square]
+   if abs(from_piece) == 1 and pt.convert_loc(to_square) == board.en_passant:
+      return True
+   return False
+def is_castling(board : Board, from_square : int, to_square : int):
+   from_piece = board.array[from_square]
+   distance = to_square - from_square
+   if abs(from_piece) == 6 and abs(distance) == move.EAST*2:
+      return True
+   return False 
 
 

@@ -23,18 +23,19 @@ piece_steps = {
 
 class Move:
    def __init__(self,
-                from_square   : int,   to_square      : int,
-                from_piece    : int,   to_piece       : int,
-                en_passant    : str,   en_passanted   : int = 0,
-                castling      : str = "KQkq"):
+                board         : Board,
+                from_square   : int, to_square      : int):
 
       self.from_square     = from_square
       self.to_square       = to_square
-      self.from_piece      = from_piece
-      self.to_piece        = to_piece
-      self.en_passant      = en_passant # State before move
-      self.en_passanted    = en_passanted
-      self.castling        = castling
+      self.from_piece      = board.array[from_square]
+      self.to_piece        = board.array[to_square]
+      self.en_passant      = board.en_passant # State before move
+      self.en_passanted    = None # Gets updated accordingly in push() control flow
+      self.castle_rook_old = None # Gets updated accrodingly in push() control flow
+      self.castle_rook_new = None
+      self.castling_rights = board.castling
+      
 
    def __str__(self):
 
@@ -43,6 +44,7 @@ class Move:
       print(f"To:   {pt.convert_loc(self.to_square)}")
       print(f"Piece: {self.to_piece}")
       print(f"en_passant: {self.en_passant}")
+      print(f"Castling: {self.castling}")
 
       return ""
 
@@ -328,6 +330,7 @@ def is_enpassantable(board : Board, start_idx : int, end_idx : int):
    return result
 
 def get_castling_steps(board : Board, start_idx : int) -> list:
+
    result = []
    piece = board.array[start_idx]
 

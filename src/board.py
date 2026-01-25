@@ -45,42 +45,31 @@ class Board:
       return ""
 
    def push(self, from_square : int, to_square : int) -> Board:
-      from_piece = self.array[from_square]
-      to_piece = self.array[to_square]
-      en_passant = self.en_passant
-      castling = self.castling
-      direction = pt.sgn(from_piece)
-
-
-      # Check if the moving piece is the king and update location and castling 
-      # rights.
-      bt.update_castling_rights(self, from_square, to_square)
-
-      # Check if the moving piece was a double jump and update en_passant flag
-      # if adjancent squares can see it.
-      bt.update_en_passant(self, from_square, to_square)
-
-      # Update active color
-      self.active_color = -1 * self.active_color
-
-      # Update Move Number
-      self.half_move += 1
-      if self.active_color == 1: self.full_move += 1
-
-      # Update board by replacing elements
-      self.array[to_square] = from_piece
-      self.array[from_square] = 0
-
-      # Update history
+      direction = pt.sgn(self.array[from_square])
+      
       ## Create Move object to capture move data
-      this_move = move.Move(from_square,to_square, 
-                            from_piece, to_piece, 
-                            en_passant, castling = castling)
-
-      if abs(from_piece) == 1 and pt.convert_loc(to_square) == en_passant:
+      this_move = move.Move(self, from_square, to_square)
+      if bt.is_en_passant(self, from_square, to_square):
          this_move.en_passanted = to_square - direction*move.NORTH
          self.array[to_square - direction*move.NORTH] = 0
+      elif bt.is_castling(self, from_square, to_square):
+         if from_square < to_square : # King side
+            this_move.castle_rook_old = to_square + move.EAST
+            this_move.castle_rook_new = to_square + move.WEST
+            self.array[to_square + move.WEST] = self.array[to_square + move.EAST]
+            self.array[to_square + move.EAST] = 0
+         else: 
+            this_move.castle_rook_old = to_square + move.WEST*2
+            this_move.castle_rook_new = to_square + move.EAST
+            self.array[to_square + move.EAST] = self.array[to_square + move.WEST * 2]
+            self.array[to_square + move.WEST * 2] = 0
+      
       self.history.append(this_move)
+      bt.update_meta(self, from_square, to_square)
+
+      # Update board by replacing elements
+      self.array[to_square] = self.array[from_square]
+      self.array[from_square] = 0
 
       return this_move
 
@@ -130,8 +119,12 @@ class Board:
          self.black_king = from_square
 
       # Revert changes to en_passant and castling
-      self.en_passant   = last_move.en_passant
-      self.castling     = last_move.castling
+      self.en_passant = last_move.en_passant
+      self.castling   = last_move.castling_rights
 
+      # Move rook back if castling:
+      if last_move.castle_rook_new:
+         self.array[last_move.castle_rook_old] = self.array[last_move.castle_rook_new]
+         self.array[last_move.castle_rook_new] = 0
       return last_move
 
