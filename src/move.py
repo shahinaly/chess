@@ -50,7 +50,6 @@ class Move:
 
 # High-level callers, for lack of a better term
 def get_all_moves(board : Board):
-
    # Retrieve active_color
    active_color = board.active_color
 
@@ -78,7 +77,7 @@ def get_legal_moves(board : Board, start_idx : int, san_flag = False) -> list:
       board.push_idx(start_idx, move)
       if not(in_check(board,active_color)):
          if san_flag:
-            result.append(pt.convert_loc(move))
+            result.append(pt.convert_loc(start_idx) + pt.convert_loc(move))
          else:
             result.append(move)
       board.pop()

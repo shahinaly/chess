@@ -24,37 +24,44 @@ def test_convert_loc():
       if (i+1) % 12 == 0:
          print("\n",end='')
 
-def node_counter(b : Board, depth : int, 
-                 nodes        : int = 0, 
-                 captures     : int = 0, 
-                 enpassants   : int = 0, 
-                 castlings    : int = 0,
-                 checks       : int = 0) -> int:
+def node_counter(b      : Board, 
+                 depth  : int, 
+                 nodes  : int = 0) -> int:
    if depth == 0:
-      if mv.in_check(b):
-         return [nodes + 1, captures, enpassants, castlings, checks + 1]
-      else:
-         return [nodes + 1, captures, enpassants, castlings, checks]
+      return nodes + 1
    else:
       candidate_moves = mv.get_all_moves(b)
 
-      for piece in candidate_moves:
-         for target in candidate_moves[piece]:
-            new_move = piece + target
-            if bt.is_capture(b, pt.convert_loc(piece), pt.convert_loc(target)) and (depth - 1 == 0):
-               captures += 1
-            elif bt.is_en_passant(b, pt.convert_loc(piece), pt.convert_loc(target)) and (depth -1 == 0):
-               enpassants += 1
-            elif bt.is_castling(b, pt.convert_loc(piece), pt.convert_loc(target)) and (depth -1 == 0):
-               castlings += 1
-            b.push_lan(new_move)
-            nodes, captures, enpassants, castlings, checks = node_counter(b, depth -1, nodes, captures, enpassants, castlings, checks)
+      for from_square in candidate_moves:
+         for move in candidate_moves[from_square]:
+            b.push_lan(move)
+            nodes = node_counter(b, depth -1, nodes)
             b.pop()
-
-      return [nodes, captures, enpassants, castlings, checks]
+      return nodes
 
 def count_dict(move_dict : Dict) -> int:
    result = 0
    for key in move_dict:
       result += len(move_dict[key])
    return result
+
+
+def perft(depth   : int,
+          fen     : str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") -> (int, dict):
+
+   board = b.Board(fen = fen)
+
+   nodes_total = 0
+   nodes_dict  = {}
+
+   candidate_moves = mv.get_all_moves(board)
+   
+   for key in candidate_moves.keys():
+      for move in candidate_moves[key]:
+         board.push_lan(move)
+         nodes_dict[move] = node_counter(board,depth)
+         nodes_total += nodes_dict[move]
+         board.pop()
+
+   return (nodes_total, nodes_dict)
+   
