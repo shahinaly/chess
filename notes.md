@@ -36,3 +36,14 @@ broadly classified as follows:
   - Special Pawn Moves
 # 2025-12-17
 The goal for today is to implement legal moves and have a function for making and unmaking moves.
+
+# 2026-01-27
+Debugging.
+
+First bug: Realized this bug while watching sebastian lange's video. Castling rights weren't properly updated after a rook is captured, allowing a king to castle using an opponent's piece.
+
+## Current focus:
+  - Position: 8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 b - - 0 2
+  - Thinking was the engine allowed en-passants that result in revealed checks. This doesn't happen.
+  - In the above position, if we play d5 ("8/8/8/KPpp3r/5p1k/1R6/4P1P1/8 w - c6"), the engine then recognizes the en-passant as a legal move.
+

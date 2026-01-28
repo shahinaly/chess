@@ -28,8 +28,6 @@ class Board:
       self.white_king, self.black_king = bt.find_kings(self)
 
    def __str__(self):
-
-      print("—"*72)
       bt.print_board_array(self)
       print("—"*72)
 
@@ -56,18 +54,21 @@ class Board:
          if from_square < to_square : # King side
             this_move.castle_rook_old = to_square + move.EAST
             this_move.castle_rook_new = to_square + move.WEST
+
+            # Update secondary pieces (rook) when castling
             self.array[to_square + move.WEST] = self.array[to_square + move.EAST]
             self.array[to_square + move.EAST] = 0
-         else: 
+         else: # Queen side
             this_move.castle_rook_old = to_square + move.WEST*2
             this_move.castle_rook_new = to_square + move.EAST
+            # update secondary pieces (rook) when castling
             self.array[to_square + move.EAST] = self.array[to_square + move.WEST * 2]
             self.array[to_square + move.WEST * 2] = 0
       
       self.history.append(this_move)
       bt.update_meta(self, from_square, to_square)
 
-      # Update board by replacing elements
+      # Update board by replacing primary elements
       self.array[to_square] = self.array[from_square]
       self.array[from_square] = 0
 

@@ -228,6 +228,10 @@ def king_castles(board : Board, start_idx : int) -> list:
    
    result = []
    piece = board.array[start_idx]
+
+   if in_check(board, piece):
+      return result
+
    direction_steps = get_castling_steps(board, start_idx)
 
    for direction in direction_steps:

@@ -1,0 +1,2 @@
+1. Enpassant Flag: Anytime a pawn jumps two spots the enpassant field is activated. This identifies enpassant as a pseudo legal move to be checked later. The problem is that when a pawn jumps two squares but the enpassant is not legal (due to a resulting revealed check), the metadata still prints the enpassant square being attacked. This is not an issue now as it does not interfere with valid move generation but should be tidied up when thinking about interface presentation.
+

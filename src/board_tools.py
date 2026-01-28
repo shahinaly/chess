@@ -7,10 +7,11 @@ def print_board_array(self):
    # 81...88/.../11...18
    for rank in reversed(range(12)):
       if rank in [2,3,4,5,6,7,8,9]:
-         print(rank - 1, end = '|')
+         print(f" {rank - 1}", end = '|')
+      if rank == 0 or rank == 10 :
+         print("   " + "------------------------")
       if rank == 0:
-         print("  -----------------------")
-         print("   A  B  C  D  E  F  G  H")
+         print("   " + " A  B  C  D  E  F  G  H")
       for file in range(12):
          square = rank*12 + file # for when I mess up coorddinates, inevitably
          # print empty squares as '_'
@@ -21,7 +22,7 @@ def print_board_array(self):
             print(f" {piece_rep(self.array[square])} ", end = '')
          # Newline after 8 files, exlcuding boundary squares
          if file == 11 and (not (rank in [0,1,10,11])):
-            print("\n", end = '')
+            print(f"| \n", end = '')
    return ""
 
 def make_board(fen : str):
@@ -78,22 +79,28 @@ def update_meta(board: Board, from_square : int, to_square : int):
    update_turn_fields(board) # move number and active_color
 
 def update_castling_rights(board : Board, from_square: int, to_square : int) -> bool :
-   piece = board.array[from_square]
-   square = pt.convert_loc(from_square)
-   if square == 'a1' and piece == 4:
+   from_piece  = board.array[from_square]
+   to_piece    = board.array[to_square]
+
+   BOTTOM_LEFT    = pt.convert_loc('a1')
+   BOTTOM_RIGHT   = pt.convert_loc('h1')
+   TOP_LEFT       = pt.convert_loc('a8')
+   TOP_RIGHT      = pt.convert_loc('h8')
+
+   if from_square == BOTTOM_LEFT or to_square == BOTTOM_LEFT:
       board.castling = board.castling.replace('Q','')
-   elif square == 'h1' and piece == 4:
+   elif from_square == BOTTOM_RIGHT or to_square == BOTTOM_RIGHT:
       board.castling = board.castling.replace('K','')
-   elif square == 'a8' and piece == -4:
+   elif from_square == TOP_LEFT or to_square == TOP_LEFT:
       board.castling = board.castling.replace('q','')
-   elif square == 'h8' and piece == -4:
+   elif from_square == TOP_RIGHT or to_square == TOP_RIGHT:
       board.castling = board.castling.replace('k','')
-   elif piece == 6:
+   elif from_piece == 6:
       board.white_king = to_square
       board.castling = board.castling.replace('K','')
       board.castling = board.castling.replace('Q','')
       return True
-   elif piece ==  -6:
+   elif from_piece ==  -6:
       board.black_king = to_square
       board.castling = board.castling.replace('k','')
       board.castling = board.castling.replace('q','')
@@ -130,4 +137,6 @@ def is_castling(board : Board, from_square : int, to_square : int):
       return True
    return False 
 
+def is_capture(board: Board, from_square : int, to_square : int) -> bool:
+   return bool(board.array[to_square] != 0)
 
